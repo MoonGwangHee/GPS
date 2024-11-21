@@ -83,35 +83,40 @@
         </div>
     </div>
 
-    <!-- 차트 컨테이너들 -->
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">접속자 평균</span>
-            <span class="chart-period">월별 통계</span>
+    <div class="charts-wrapper">
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">시설 분류 통계</span>
+                <span class="chart-period">카테고리별</span>
+            </div>
+            <canvas id="visitorChart"></canvas>
         </div>
-        <div class="chart" id="visitorChart"></div>
-    </div>
 
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">전체 조회수</span>
-            <span class="chart-period">일별 통계</span>
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">카테고리별 리뷰 수</span>
+                <span class="chart-period">전체 통계</span>
+            </div>
+            <canvas id="viewsChart"></canvas>
         </div>
-        <div class="chart" id="viewsChart"></div>
-    </div>
 
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">전체 댓글수</span>
-            <span class="chart-period">일별 통계</span>
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">회원가입 현황</span>
+                <span class="chart-period">로그인 타입별</span>
+            </div>
+            <canvas id="commentsChart"></canvas>
         </div>
-        <div class="chart" id="commentsChart"></div>
     </div>
 </div>
 
 
-<!-- Font Awesome -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
 
 <script>
 
@@ -975,6 +980,7 @@
                <button class="search-btn">검색</button>
            </div>
            <div class="buttons">
+                <button class="btn btn-primary" onclick="showEditModalMember()">회원 수정</button>
                 <button class="btn btn-primary" onclick="deleteSelectedUsers()">회원 삭제</button>
            </div>
        </div>
@@ -1050,7 +1056,6 @@
                 { content: user.gender || '-' },
                 { content: user.mcreatedAt ? new Date(user.mcreatedAt).toLocaleDateString() : '-' },
                 { content: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-' },
-                { content: user.authority || '-' }
             ];
 
             cells.forEach(cellData => {
@@ -1209,6 +1214,323 @@
             }
         }
     }
+
+    function showEditModalMember() {
+        const selectedCheckboxes = document.querySelectorAll('.user-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('수정할 회원을 선택해주세요.');
+            return;
+        }
+
+        if (selectedCheckboxes.length > 1) {
+            alert('한 번에 하나의 회원만 수정할 수 있습니다.');
+            return;
+        }
+
+        const userRow = selectedCheckboxes[0].closest('.user-row');
+        const userId = parseInt(userRow.getAttribute('data-user-id'));
+        const user = currentUsers.find(u => u.userId === userId);
+
+        if (!user) return;
+        const birthDate = user.birth ? new Date(user.birth).toISOString().split('T')[0] : '';
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = ''
+            + '<div class="modal-content-member">'
+            + '    <div class="basic-info-member">'
+            + '        <div class="left-section-member">'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-user"></i> 아이디</label>'
+            + '                <input type="text" class="form-control" id="editUserId" value="' + (user.mid || '') + '" disabled>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-signature"></i> 성명</label>'
+            + '                <input type="text" class="form-control" id="editName" value="' + (user.name || '') + '" disabled>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-id-badge"></i> 닉네임</label>'
+            + '                <div class="nickname-group">'
+            + '                    <input type="text" class="form-control" id="editNickname" value="' + (user.nickname || '') + '">'
+            + '                    <button class="btn-check-duplicate" onclick="checkNickname()">체크</button>'
+            + '                </div>'
+            + '            </div>'
+            + '        </div>'
+            + '        <div class="right-section">'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-envelope"></i> 이메일</label>'
+            + '                <input type="email" class="form-control" id="editEmail" value="' + (user.email || '') + '">'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-calendar"></i> 생년월일</label>'
+            + '                <input type="date" class="form-control" id="editBirth" value="' + birthDate + '">'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-venus-mars"></i> 성별</label>'
+            + '                <div class="radio-group">'
+            + '                    <input type="radio" id="editGenderM" name="gender" value="MALE" ' + (user.gender === 'MALE' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderM">남성</label>'
+            + '                    <input type="radio" id="editGenderF" name="gender" value="FEMALE" ' + (user.gender === 'FEMALE' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderF">여성</label>'
+            + '                    <input type="radio" id="editGenderO" name="gender" value="OTHER" ' + (user.gender === 'OTHER' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderO">기타</label>'
+            + '                </div>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-user-shield"></i> 권한</label>'
+            + '                <div class="authority-toggle-member">'
+            + '                    <span class="auth-label-member">일반</span>'
+            + '                    <div class="toggle-switch-member" onclick="updateUserAuthority(\'' + user.userId + '\', ' + (user.authority !== 'ADMIN') + ')">'
+            + '                        <div class="toggle-slider-member' + (user.authority === 'ADMIN' ? ' active' : '') + '"></div>'
+            + '                    </div>'
+            + '                    <span class="auth-label-member">관리자</span>'
+            + '                </div>'
+            + '            </div>'
+            + '        </div>'
+            + '    </div>'
+            + '    <div class="edit-buttons">'
+            + '        <button class="btn-edit btn-save" onclick="saveUserChanges(' + user.userId + ')">변경 저장</button>'
+            + '        <button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>'
+            + '    </div>'
+            + '</div>';
+
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    async function saveUserChanges(userId) {
+        const birthDate = document.getElementById('editBirth').value;
+        // authority 체크 방식 변경
+        const authorityToggle = document.querySelector('.authority-toggle-member');
+        const isAdmin = authorityToggle ? authorityToggle.classList.contains('active') : false;
+
+        const updatedUser = {
+            name: document.getElementById('editName').value,
+            nickname: document.getElementById('editNickname').value,
+            email: document.getElementById('editEmail').value,
+            birth: birthDate + 'T00:00:00',
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            authority: isAdmin ? 'ADMIN' : 'USER'  // 수정된 부분
+        };
+
+        try {
+            const response = await fetch('/api/members/' + userId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedUser),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('회원 정보가 수정되었습니다.');
+                closeModal();
+                loadUserList(currentPageUsers);
+            } else {
+                throw new Error('수정 실패');
+            }
+        } catch (error) {
+            console.error('회원 정보 수정 중 오류:', error);
+            alert('회원 정보 수정 중 오류가 발생했습니다.');
+        }
+    }
+
+    // 중복 체크 닉네임
+    async function checkNickname() {
+        const nickname = document.getElementById('editNickname').value;
+
+        if (!nickname) {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/check-nickname', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nickname: nickname }),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.isDuplicate) {
+                    alert("이미 사용 중인 닉네임입니다.");
+                } else {
+                    alert("사용 가능한 닉네임입니다.");
+                }
+            } else {
+                throw new Error('중복 확인 실패');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("중복 확인 중 오류가 발생했습니다.");
+        }
+    }
+
+
+    // visitorChart를 카테고리별 시설 차트로 변경
+    async function loadCategoryStats() {
+        try {
+            const response = await fetch('/api/stats/category', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('visitorChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.category),
+                    datasets: [{
+                        label: '시설 수',
+                        data: data.map(item => item.count),
+                        backgroundColor: '#8884d8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('카테고리 통계 로드 실패:', error);
+        }
+    }
+
+
+    async function loadCategoryReviewStats() {
+        try {
+            const response = await fetch('/api/stats/category-reviews', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => {
+                        switch(item.category) {
+                            case 'water': return '수상 스포츠';
+                            case 'ball': return '구기 스포츠';
+                            case 'physics': return '피지컬';
+                            case 'battle': return '격투기';
+                            default: return item.category;
+                        }
+                    }),
+                    datasets: [{
+                        label: '리뷰 수',
+                        data: data.map(item => item.reviewCount),
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',  // 수상 스포츠 - 파란색
+                            'rgba(255, 99, 132, 0.7)',  // 구기 스포츠 - 빨간색
+                            'rgba(75, 192, 192, 0.7)',  // 피지컬 - 초록색
+                            'rgba(255, 159, 64, 0.7)'   // 격투기 - 주황색
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false  // 범례 숨기기
+                        },
+                        title: {
+                            display: true,
+                            text: '카테고리별 전체 리뷰 수',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `리뷰 수: ${context.raw}개`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('카테고리별 리뷰 통계 로드 실패:', error);
+        }
+    }
+
+
+    async function loadUserTypeStats() {
+        try {
+            const response = await fetch('/api/stats/user-types', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('commentsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',  // 도넛 차트로 변경
+                data: {
+                    labels: ['일반 로그인', '카카오 로그인', '구글 로그인'],
+                    datasets: [{
+                        data: [
+                            data.find(item => item.providerType === 'LOCAL')?.count || 0,
+                            data.find(item => item.providerType === 'KAKAO')?.count || 0,
+                            data.find(item => item.providerType === 'GOOGLE')?.count || 0
+                        ],
+                        backgroundColor: [
+                            '#FF6384',  // 일반 로그인
+                            '#FFE500',  // 카카오 색상
+                            '#4285F4'   // 구글 색상
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: '로그인 타입별 회원 분포'
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('회원 통계 로드 실패:', error);
+        }
+    }
+
+    // 페이지 로드 시 차트 로드
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCategoryStats();
+        loadCategoryReviewStats();  // 수정된 부분
+        loadUserTypeStats();
+    });
 
     // 전역 변수 추가
     let currentPageUsers = 0;

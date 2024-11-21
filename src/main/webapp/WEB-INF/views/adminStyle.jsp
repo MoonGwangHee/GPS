@@ -370,29 +370,77 @@ margin-right: 10px;
 
 /* 차트 컨테이너 스타일 */
 .chart-container {
+width: 80%;  /* 너비를 줄여서 여유 공간 확보 */
+margin: 20px auto;  /* 중앙 정렬 */
+padding: 30px;
 background: white;
 border-radius: 8px;
-padding: 20px;
-margin-bottom: 20px;
 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+display: block;  /* 세로로 쌓이도록 block으로 변경 */
+position: relative;
 }
 
+/* 도넛 차트 크기 조정 */
+#commentsChart {
+width: 100% !important;
+height: 300px !important;
+margin: auto;  /* 중앙 정렬 */
+}
+
+/* 마지막 차트(도넛 차트)만 크기 조절 */
+.chart-container:last-child canvas {
+max-width: 500px !important;  /* 최대 너비 제한 */
+max-height: 300px !important; /* 최대 높이 제한 */
+margin: 0 auto;  /* 중앙 정렬 */
+display: block;  /* 가운데 정렬을 위해 */
+}
+
+
 .chart-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 15px;
+text-align: center;
+margin-bottom: 20px;
 }
 
 .chart-title {
-font-size: 18px;
-font-weight: 600;
+font-size: 20px;
+font-weight: bold;
 color: #333;
+display: block;
+margin-bottom: 8px;
 }
 
 .chart-period {
+font-size: 16px;
 color: #666;
-font-size: 14px;
+display: block;
+}
+
+canvas {
+width: 100% !important;
+height: 400px !important;  /* 높이를 더 키워서 보기 좋게 */
+margin: 0 auto;
+}
+
+
+/* 차트 컨테이너 정렬을 위한 wrapper */
+.charts-wrapper {
+padding: 20px;
+max-width: 1200px;  /* 최대 너비 설정 */
+margin: 0 auto;
+}
+
+/* 차트 범례 스타일 */
+.chart-container canvas {
+width: 100% !important;
+height: 400px !important;
+}
+
+/* 도넛 차트 내부 텍스트 스타일 */
+.doughnut-inner {
+position: relative;
+top: -50%;
+font-size: 16px;
+text-align: center;
 }
 
 
@@ -707,7 +755,6 @@ cursor: pointer;
 
 /* 모달 스타일 */
 .modal {
-display: none;
 position: fixed;
 top: 0;
 left: 0;
@@ -715,6 +762,9 @@ width: 100%;
 height: 100%;
 background-color: rgba(0, 0, 0, 0.5);
 z-index: 1000;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .modal-content {
@@ -770,11 +820,11 @@ margin-top: 20px;
 }
 
 .btn-edit {
+margin-top: 20px;
 padding: 8px 16px;
-border: none;
 border-radius: 4px;
 cursor: pointer;
-font-size: 14px;
+border: none;
 }
 
 .btn-save {
@@ -889,5 +939,85 @@ color: white;
 
 .authority-cell:hover {
 opacity: 0.8;
+}
+
+
+.modal-content-member {
+max-width: 900px;
+background-color: #fff;  /* 배경색 추가 */
+padding: 20px;          /* 여백 추가 */
+border-radius: 8px;     /* 모서리 둥글게 */
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* 그림자 효과 */
+position: relative;
+margin: 50px auto;
+}
+
+.radio-group {
+display:flex;
+}
+
+.basic-info-member {
+display: flex;
+gap: 40px;
+}
+
+.left-section-member, .right-section-member {
+flex: 1;
+}
+
+.nickname-group-member {
+display: flex;
+gap: 10px;
+}
+
+.btn-check-duplicate-member {
+padding: 5px 10px;
+background: #6c757d;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.radio-group-member {
+display: flex;
+gap: 20px;
+align-items: center;
+}
+
+.authority-toggle-member {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.toggle-switch-member {
+width: 60px;
+height: 30px;
+background: #e0e0e0;
+border-radius: 15px;
+position: relative;
+cursor: pointer;
+}
+
+.toggle-slider-member {
+width: 26px;
+height: 26px;
+background: white;
+border-radius: 50%;
+position: absolute;
+top: 2px;
+left: 2px;
+transition: 0.3s;
+}
+
+.toggle-slider-member.active {
+left: 32px;
+background: #007bff;
+}
+
+.auth-label-member {
+font-size: 14px;
+color: #666;
 }
 

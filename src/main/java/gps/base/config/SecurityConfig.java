@@ -1,5 +1,6 @@
 package gps.base.config;
 
+import gps.base.component.SSOAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,6 +21,12 @@ import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
+
+    private final SSOAuthenticationFilter ssoAuthenticationFilter;
+
+    public SecurityConfig(SSOAuthenticationFilter ssoAuthenticationFilter) {
+        this.ssoAuthenticationFilter = ssoAuthenticationFilter;
+    }
 
 
     @Bean
@@ -44,6 +52,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .addFilterBefore(ssoAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> requests
                         // API 엔드포인트 보호
                         .requestMatchers("/api/protected/**").authenticated()
@@ -51,7 +61,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/oauth2/**",
                                 "/login/oauth2/code/**",
-                                "/auth/google"
+                                "/auth/google",
+                                "/login/**",
+                                "/auth/**"
                         ).permitAll()
                         // 나머지 모든 요청 허용 (SPA이므로 프론트엔드에서 처리)
                         .anyRequest().permitAll()
@@ -82,7 +94,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8080",
+                "http://localhost:3000",
+                "http://127.0.0.1:8080"
+
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

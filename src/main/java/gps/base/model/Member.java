@@ -44,7 +44,7 @@ public class Member {
     @Column(name = "nickname", nullable = true)
     private String nickname;
 
-    @Column(name = "profile_img", nullable = true)
+    @Column(name = "profile_image", nullable = true)
     private String profileImg;
 
     @Column(name = "birth")
@@ -69,7 +69,7 @@ public class Member {
     @Column(name = "m_created_at")
     private LocalDateTime mCreatedAt;
 
-    @Column(name = "m_deleted-at")
+    @Column(name = "m_deleted_at")
     private LocalDateTime mDeletedAt;
 
     @Column(name = "last_login")
